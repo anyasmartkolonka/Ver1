@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Секретный Домофон</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#111;color:#fff;font-family:system-ui,sans-serif;text-align:center;padding:8px}
+  h1{font-size:18px;margin:8px 0;opacity:.6}
+  video{width:100%;max-height:30vh;background:#000;margin-bottom:6px;object-fit:cover;border-radius:8px}
+  #local-d, #local-f {max-height:12vh}
+  canvas{width:100%;height:150px;background:#fff;border-radius:10px;touch-action:none;display:block;margin:8px 0}
+  button,input{font-size:18px;padding:12px;margin:4px 0;border-radius:10px;border:0;width:100%;box-sizing:border-box;display:block;cursor:pointer}
+  button{background:#2a6;color:#fff;font-weight:600}
+  button:active{opacity:.7}
+  .secondary{background:#444;font-size:16px;padding:10px}
+  .red{background:#a33}.blue{background:#36a}
+  .code-row{display:flex;gap:6px}
+  #code{flex:1;text-align:center;letter-spacing:6px;font-size:22px;background:#222;color:#fff;border:2px solid #2a6}
+  .code-row button{width:auto;flex:0 0 auto;font-size:16px;padding:10px}
+  #status-d, #status-f {padding:10px;font-size:15px;color:#8f8;min-height:24px;font-weight:bold}
+  .label{font-size:14px;color:#aaa;margin:6px 0;text-align:left}
+  #ring{display:none;background:#c93;color:#000;padding:14px;border-radius:12px;margin:8px 0}
+  #sig_box{display:none;background:#222;border-radius:12px;padding:12px;margin:8px 0;border:2px solid #c93}
+  #sig_img{width:100%;max-height:150px;background:#fff;border-radius:8px;object-fit:contain}
+  .row{display:flex;gap:6px;margin:4px 0}
+  .row button{flex:1}
+</style>
+</head>
+<body>
+
+<!-- ЭКРАН ДВЕРИ -->
+<div id="ui-door" style="display:none">
+  <h1>🏢 ПАНЕЛЬ У ДВЕРИ</h1>
+  <video id="remote-d" autoplay playsinline></video>
+  <video id="local-d" autoplay muted playsinline></video>
+  <div id="status-d">Подключение…</div>
+  <div class="label">✍️ Распишитесь пальцем:</div>
+  <canvas id="sig"></canvas>
+  <button id="clear" class="secondary">↺ Очистить</button>
+  <button id="sign_call">✍️ Подписать и вызвать</button>
+  <button id="call" class="secondary">📞 Только позвонить</button>
+  <div class="label">Или введите код из квартиры:</div>
+  <div class="code-row">
+    <input id="code" placeholder="······" maxlength="6" inputmode="numeric">
+    <button id="open_code">🔓 Открыть</button>
+  </div>
+</div>
+
+<!-- ЭКРАН КВАРТИРЫ -->
+<div id="ui-flat" style="display:none">
+  <h1>🏠 КВАРТИРА (ТВ / ТЕЛЕФОН)</h1>
+  <div id="ring"><h2>📞 ВХОДЯЩИЙ ЗВОНОК</h2>
+    <div class="row"><button id="answer">Ответить</button><button id="decline" class="red">Отклонить</button></div>
+  </div>
+  <div id="sig_box"><h3>✍️ Подпись гостя:</h3><img id="sig_img">
+    <div class="row"><button id="accept_sig">✅ Открыть</button><button id="reject_sig" class="red">❌ Отклонить</button></div>
+  </div>
+  <video id="remote-f" autoplay playsinline></video>
+  <video id="local-f" autoplay muted playsinline></video>
+  <div id="status-f">Подключение…</div>
+  <button id="open_direct" class="blue">🔓 Открыть дверь без фото</button>
+  <button id="gen_code" class="secondary">🔑 Сгенерировать код</button>
+  <div id="codedisplay" style="display:none;font-size:40px;color:#ff6;background:#222;padding:10px;margin:8px 0;border-radius:10px;font-weight:bold"></div>
+</div>
+
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+const params = new URLSearchParams(location.search);
+const mode = params.get('mode') || 'door'; 
+const room = params.get('room') || 'home';
+const myId = mode + '-' + room;
+const peerId = (mode === 'door' ? 'flat-' : 'door-') + room;
+
+document.getElementById(mode === 'door' ? 'ui-door' : 'ui-flat').style.display = 'block';
+const $ = id => document.getElementById(id);
+
+let peer, conn, call, localStream, currentCode = null;
+
+if (mode === 'flat' && 'Notification' in window) Notification.requestPermission();
+function notify(t, b) {
+  if (mode === 'flat' && Notification.permission === 'granted') new Notification(t, {body:b});
+  if (navigator.vibrate) navigator.vibrate([300,150,300]);
+}
+
+(async () => {
+  try {
+    localStream = await navigator.mediaDevices.getUserMedia({video:true, audio:true});
+    const loc = $('local-' + (mode==='door'?'d':'f'));
+    if (loc) loc.srcObject = localStream;
+  } catch (e) {
+    console.log('Нет камеры. Работаем только на прием.');
+    localStream = new MediaStream(); 
+  }
+
+  peer = new Peer(myId);
+  peer.on('open', () => { $('status-'+(mode==='door'?'d':'f')).textContent = '✅ Онлайн'; ensureConn(); });
+  peer.on('error', e => { $('status-'+(mode==='door'?'d':'f')).textContent = '⚠️ Ошибка сети'; });
+  
+  peer.on('connection', c => { conn = c; bindConn(); });
+  
+  if (mode === 'flat') {
+    peer.on('call', incoming => {
+      call = incoming;
+      $('ring').style.display = 'block';
+      notify('📞 Звонок в дверь', 'Кто-то пришел');
+    });
+  }
+})();
+
+function ensureConn() {
+  if (conn && conn.open) return;
+  conn = peer.connect(peerId, { reliable: true });
+  bindConn();
+  setTimeout(() => { if (!conn?.open) ensureConn(); }, 4000);
+}
+
+function bindConn() {
+  if (!conn) return;
+  conn.on('data', d => {
+    if (mode === 'door') {
+      if (d.type === 'result') $('status-d').textContent = d.ok ? '🔓 ДВЕРЬ ОТКРЫТА!' : '❌ ОТКАЗАНО';
+    } else {
+      if (d.type === 'signature') {
+        $('sig_img').src = d.image; $('sig_box').style.display = 'block';
+        notify('✍️ Подпись', 'Подтвердите вход');
+      } else if (d.type === 'verify_code') {
+        const ok = currentCode && d.code === currentCode;
+        conn.send({type:'result', ok});
+        $('status-f').textContent = ok ? '✅ Код верный' : '❌ Неверный код';
+        if(ok){ currentCode=null; $('codedisplay').style.display='none'; }
+      }
+    }
+  });
+}
+
+if (mode === 'door') {
+  const canvas = $('sig'), ctx = canvas.getContext('2d');
+  let drawing = false, hasStroke = false;
+  function initCanvas() {
+    canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight;
+    ctx.fillStyle = '#fff'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.strokeStyle = '#000';
+    hasStroke = false;
+  }
+  setTimeout(initCanvas, 100);
+  $('clear').onclick = initCanvas;
+  
+  canvas.addEventListener('pointerdown', e => { drawing=true; hasStroke=true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); });
+  canvas.addEventListener('pointermove', e => { if(drawing) { ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); } });
+  canvas.addEventListener('pointerup', () => drawing=false);
+
+  async function startCall() {
+    if (call) try { call.close(); } catch(e){}
+    call = peer.call(peerId, localStream);
+    call.on('stream', r => { $('remote-d').srcObject = r; });
+  }
+
+  $('call').onclick = () => { ensureConn(); startCall(); $('status-d').textContent = '📞 Вызов...'; };
+
+  $('sign_call').onclick = () => {
+    if (!hasStroke) return $('status-d').textContent = '⚠️ Сначала распишитесь';
+    const small = document.createElement('canvas'); small.width=400; small.height=150;
+    const s = small.getContext('2d'); s.fillStyle='#fff'; s.fillRect(0,0,400,150);
+    s.drawImage(canvas, 0, 0, canvas.width, canvas.height, 0, 0, 400, 150);
+    const img = small.toDataURL('image/jpeg', 0.6);
+    
+    ensureConn(); startCall();
+    const send = () => {
+      if (conn?.open) { conn.send({ type:'signature', image: img }); $('status-d').textContent = '📨 Ждем ответа...'; }
+      else setTimeout(send, 400);
+    };
+    send(); initCanvas();
+  };
+
+  $('open_code').onclick = () => {
+    const c = $('code').value.trim();
+    if (c.length !== 6) return $('status-d').textContent = '⚠️ Введите 6 цифр';
+    ensureConn();
+    const send = () => {
+      if (conn?.open) { conn.send({ type:'verify_code', code: c }); $('status-d').textContent = '⏳ Проверка...'; }
+      else setTimeout(send, 400);
+    };
+    send();
+  };
+} else {
+  $('answer').onclick = () => {
+    $('ring').style.display = 'none';
+    if (!call) return;
+    call.answer(localStream);
+    call.on('stream', r => { $('remote-f').srcObject = r; $('status-f').textContent = '🎥 Разговор'; });
+  };
+  $('decline').onclick = () => {
+    $('ring').style.display = 'none';
+    try { call?.close(); } catch(e){}
+    call = null; $('status-f').textContent = 'Отклонено';
+  };
+  $('accept_sig').onclick = () => {
+    $('sig_box').style.display = 'none'; ensureConn();
+    const send = () => { if (conn?.open) { conn.send({type:'result', ok:true}); $('status-f').textContent = '✅ Дверь открыта'; } else setTimeout(send, 400); };
+    send();
+  };
+  $('reject_sig').onclick = () => {
+    $('sig_box').style.display = 'none'; ensureConn();
+    const send = () => { if (conn?.open) { conn.send({type:'result', ok:false}); $('status-f').textContent = '❌ Отклонено'; } else setTimeout(send, 400); };
+    send();
+  };
+  $('open_direct').onclick = () => {
+    ensureConn();
+    const send = () => { if (conn?.open) { conn.send({type:'result', ok:true}); $('status-f').textContent = '🔓 Дверь открыта'; } else setTimeout(send, 400); };
+    send();
+  };
+  $('gen_code').onclick = () => {
+    currentCode = String(Math.floor(100000 + Math.random() * 900000));
+    $('codedisplay').textContent = currentCode; $('codedisplay').style.display = 'block';
+    $('status-f').textContent = '🔑 Код создан'; notify('🔑 Код доступа', currentCode);
+  };
+}
+</script>
+</body>
+</html>
