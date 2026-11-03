@@ -6,127 +6,59 @@
 <title>Секретный Домофон</title>
 <style>
   :root {
-    --bg: #0a0a0c;
-    --card: rgba(255, 255, 255, 0.05);
-    --text: #ffffff;
-    --text-dim: #8e8e93;
-    --green: #34c759;
-    --green-glow: rgba(52, 199, 89, 0.4);
-    --red: #ff3b30;
-    --blue: #007aff;
-    --blue-glow: rgba(0, 122, 255, 0.4);
-    --border: rgba(255, 255, 255, 0.1);
-    --purple: #af52de;
-    --purple-glow: rgba(175, 82, 222, 0.4);
+    --bg: #0a0a0c; --card: rgba(255, 255, 255, 0.05); --text: #ffffff;
+    --text-dim: #8e8e93; --green: #34c759; --green-glow: rgba(52, 199, 89, 0.4);
+    --red: #ff3b30; --blue: #007aff; --blue-glow: rgba(0, 122, 255, 0.4);
+    --border: rgba(255, 255, 255, 0.1); --purple: #af52de; --purple-glow: rgba(175, 82, 222, 0.4);
   }
-
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  
   body {
     margin: 0; background: var(--bg); color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     text-align: center; padding: 12px; padding-bottom: 40px;
     background-image: radial-gradient(circle at 50% 0%, #1c1c22 0%, var(--bg) 60%);
     min-height: 100vh;
   }
-
   h1 { font-size: 16px; margin: 10px 0 15px; font-weight: 600; letter-spacing: 1px; color: var(--text-dim); text-transform: uppercase; }
-
-  video {
-    width: 100%; max-height: 30vh; background: #000;
-    border-radius: 20px; object-fit: cover;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-    margin-bottom: 10px; border: 1px solid var(--border);
-  }
+  video { width: 100%; max-height: 30vh; background: #000; border-radius: 20px; object-fit: cover; box-shadow: 0 10px 30px rgba(0,0,0,0.6); margin-bottom: 10px; border: 1px solid var(--border); }
   #local-d, #local-f { max-height: 12vh; border-radius: 12px; opacity: 0.8; margin-bottom: 15px; }
-
-  button, input {
-    font-size: 17px; font-weight: 600; padding: 16px;
-    margin: 8px 0; border-radius: 16px; border: none;
-    width: 100%; box-sizing: border-box; display: block;
-    cursor: pointer; transition: transform 0.1s, opacity 0.2s;
-  }
+  button, input { font-size: 17px; font-weight: 600; padding: 16px; margin: 8px 0; border-radius: 16px; border: none; width: 100%; box-sizing: border-box; display: block; cursor: pointer; transition: transform 0.1s, opacity 0.2s; }
   button:active { transform: scale(0.96); }
-
   .btn-green { background: linear-gradient(135deg, #2ecc71, #27ae60); color: #fff; box-shadow: 0 6px 20px var(--green-glow); }
   .btn-blue { background: linear-gradient(135deg, #3498db, #2980b9); color: #fff; box-shadow: 0 6px 20px var(--blue-glow); }
   .btn-grey { background: var(--card); color: var(--text); border: 1px solid var(--border); }
-  .btn-red { background: linear-gradient(135deg, #e74c3c, #c0392b); color: #fff; box-shadow: 0 6px 20px rgba(231, 76, 60, 0.3); }
+  .btn-red { background: linear-gradient(135deg, #e74c3c, #c0392b); color: #fff; }
   .btn-purple { background: linear-gradient(135deg, #af52de, #9b59b6); color: #fff; box-shadow: 0 6px 20px var(--purple-glow); }
-
-  canvas {
-    width: 100%; height: 160px; background: #fff;
-    border-radius: 20px; touch-action: none; display: block;
-    margin: 10px 0; box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-  }
-  .label { font-size: 13px; color: var(--text-dim); margin: 15px 0 5px; text-align: left; padding-left: 5px; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
-
-  #status-d, #status-f, #status-a {
-    padding: 12px; font-size: 15px; font-weight: 700;
-    color: #fff; background: var(--card); border-radius: 12px;
-    margin-bottom: 15px; border: 1px solid var(--border);
-  }
-
+  canvas { width: 100%; height: 160px; background: #fff; border-radius: 20px; touch-action: none; display: block; margin: 10px 0; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+  .label { font-size: 13px; color: var(--text-dim); margin: 15px 0 5px; text-align: left; padding-left: 5px; text-transform: uppercase; font-weight: 600; }
+  #status-d, #status-f, #status-a { padding: 12px; font-size: 15px; font-weight: 700; color: #fff; background: var(--card); border-radius: 12px; margin-bottom: 15px; border: 1px solid var(--border); }
   .code-row { display: flex; gap: 10px; }
-  #code {
-    flex: 1; text-align: center; letter-spacing: 8px; font-size: 24px;
-    background: rgba(0,0,0,0.5); color: #fff; border: 2px solid var(--border);
-    margin: 0; padding: 12px;
-  }
-  #code:focus { outline: none; border-color: var(--green); }
+  #code { flex: 1; text-align: center; letter-spacing: 8px; font-size: 24px; background: rgba(0,0,0,0.5); color: #fff; border: 2px solid var(--border); margin: 0; padding: 12px; }
   .code-row button { width: auto; flex: 0 0 auto; margin: 0; padding: 0 24px; background: var(--card); border: 1px solid var(--border); }
-
-  #ring {
-    display: none; background: linear-gradient(135deg, #f39c12, #e67e22);
-    color: #fff; padding: 20px; border-radius: 24px; margin-bottom: 15px;
-    box-shadow: 0 10px 30px rgba(243, 156, 18, 0.4);
-    animation: pulse 1.5s infinite;
-  }
-  #ring h2 { margin: 0 0 15px; font-size: 22px; font-weight: 800; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-  
-  @keyframes pulse {
-    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(243, 156, 18, 0.7); }
-    70% { transform: scale(1.02); box-shadow: 0 0 0 15px rgba(243, 156, 18, 0); }
-    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(243, 156, 18, 0); }
-  }
-
-  #sig_box {
-    display: none; background: var(--card); border-radius: 24px;
-    padding: 15px; margin-bottom: 15px; border: 2px solid var(--blue);
-    box-shadow: 0 0 20px var(--blue-glow);
-  }
-  #sig_box h3 { margin: 0 0 10px; font-size: 16px; color: #fff; }
+  #ring { display: none; background: linear-gradient(135deg, #f39c12, #e67e22); color: #fff; padding: 20px; border-radius: 24px; margin-bottom: 15px; box-shadow: 0 10px 30px rgba(243, 156, 18, 0.4); animation: pulse 1.5s infinite; }
+  #ring h2 { margin: 0 0 15px; font-size: 22px; font-weight: 800; }
+  @keyframes pulse { 0% { transform: scale(1); } 70% { transform: scale(1.02); } 100% { transform: scale(1); } }
+  #sig_box { display: none; background: var(--card); border-radius: 24px; padding: 15px; margin-bottom: 15px; border: 2px solid var(--blue); }
+  #sig_box h3 { margin: 0 0 10px; font-size: 16px; }
   #sig_img { width: 100%; max-height: 150px; background: #fff; border-radius: 12px; object-fit: contain; margin-bottom: 10px; }
-
-  #codedisplay {
-    display: none; font-size: 44px; letter-spacing: 12px; color: var(--green);
-    background: rgba(52, 199, 89, 0.1); padding: 15px; margin: 15px 0;
-    border-radius: 16px; font-weight: 800; border: 2px solid var(--green);
-    text-shadow: 0 0 10px var(--green-glow);
-  }
-
+  #codedisplay { display: none; font-size: 44px; letter-spacing: 12px; color: var(--green); background: rgba(52, 199, 89, 0.1); padding: 15px; margin: 15px 0; border-radius: 16px; font-weight: 800; border: 2px solid var(--green); }
   .row { display: flex; gap: 10px; margin: 8px 0; }
   .row button { flex: 1; margin: 0; }
-  
-  /* Стили для Админки */
   .admin-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 20px; margin-bottom: 15px; }
 </style>
 </head>
 <body>
 
-<!-- ЭКРАН ДВЕРИ -->
 <div id="ui-door" style="display:none">
   <h1>🏢 Панель у двери</h1>
   <video id="remote-d" autoplay playsinline></video>
   <video id="local-d" autoplay muted playsinline></video>
-  <div id="status-d">Подключение...</div>
-  
+  <div id="status-d">Инициализация сети...</div>
   <div class="label">✍️ Распишитесь пальцем:</div>
   <canvas id="sig"></canvas>
   <button id="clear" class="btn-grey">↺ Очистить</button>
   <button id="sign_call" class="btn-green">✍️ Подписать и вызвать</button>
   <button id="call" class="btn-grey">📞 Только позвонить</button>
-  
   <div class="label">Или введите код из квартиры:</div>
   <div class="code-row">
     <input id="code" placeholder="······" maxlength="6" inputmode="numeric">
@@ -134,51 +66,35 @@
   </div>
 </div>
 
-<!-- ЭКРАН КВАРТИРЫ -->
 <div id="ui-flat" style="display:none">
   <h1>🏠 Квартира</h1>
-  
   <div id="ring">
     <h2>📞 ВХОДЯЩИЙ ЗВОНОК</h2>
-    <div class="row">
-      <button id="answer" class="btn-green">Ответить</button>
-      <button id="decline" class="btn-red">Отклонить</button>
-    </div>
+    <div class="row"><button id="answer" class="btn-green">Ответить</button><button id="decline" class="btn-red">Отклонить</button></div>
   </div>
-
   <div id="sig_box">
     <h3>✍️ Подпись гостя:</h3>
     <img id="sig_img" alt="Подпись">
-    <div class="row">
-      <button id="accept_sig" class="btn-green">✅ Открыть</button>
-      <button id="reject_sig" class="btn-red">❌ Отклонить</button>
-    </div>
+    <div class="row"><button id="accept_sig" class="btn-green">✅ Открыть</button><button id="reject_sig" class="btn-red">❌ Отклонить</button></div>
   </div>
-
   <video id="remote-f" autoplay playsinline></video>
   <video id="local-f" autoplay muted playsinline></video>
-  <div id="status-f">Подключение...</div>
-
+  <div id="status-f">Инициализация сети...</div>
   <div id="codedisplay"></div>
-
   <button id="open_direct" class="btn-blue">🔓 Открыть дверь</button>
   <button id="gen_code" class="btn-grey">🔑 Сгенерировать код</button>
 </div>
 
-<!-- ЭКРАН АДМИНИСТРАТОРА -->
 <div id="ui-admin" style="display:none">
   <h1>🛡️ Администратор</h1>
-  
   <div class="admin-card">
-    <div id="status-a">Подключение к двери...</div>
-    <p style="font-size:13px; color:var(--text-dim); margin-top:0;">Удаленное управление замком и связью</p>
+    <div id="status-a">Инициализация...</div>
+    <p style="font-size:13px; color:var(--text-dim); margin-top:0;">Удаленное управление</p>
   </div>
-
   <button id="admin_open" class="btn-purple" style="padding: 30px; font-size: 24px;">🔓 ОТКРЫТЬ ДВЕРЬ</button>
-  
   <div class="admin-card" style="margin-top: 20px;">
-    <h3 style="font-size:14px; color:var(--text-dim); text-transform:uppercase; margin-top:0;">Статус системы</h3>
-    <p>Дверь на связи: <span id="door-link" style="color:var(--red)">Нет</span></p>
+    <h3 style="font-size:14px; color:var(--text-dim); text-transform:uppercase; margin-top:0;">Статус</h3>
+    <p>Связь с дверью: <span id="door-link" style="color:var(--red)">Нет</span></p>
   </div>
 </div>
 
@@ -188,7 +104,6 @@ const params = new URLSearchParams(location.search);
 const mode = params.get('mode') || 'door'; 
 const room = params.get('room') || 'home';
 const myId = mode + '-' + room;
-// Админ и Квартира подключаются к Двери. Дверь подключается к Квартире.
 const peerId = (mode === 'door' ? 'flat-' : 'door-') + room;
 
 document.getElementById('ui-' + mode).style.display = 'block';
@@ -209,30 +124,44 @@ function notify(t, b) {
       const loc = $('local-' + (mode==='door'?'d':'f'));
       if (loc) loc.srcObject = localStream;
     } catch (e) {
-      console.log('Нет камеры.');
+      console.log('Нет камеры:', e);
       localStream = new MediaStream(); 
     }
   }
 
-  peer = new Peer(myId);
-  peer.on('open', () => { 
-    if(mode==='door') $('status-d').textContent = '✅ Система онлайн';
-    if(mode==='flat') $('status-f').textContent = '✅ Система онлайн';
-    if(mode==='admin') {
-      $('status-a').textContent = '✅ Пульт онлайн';
-      $('door-link').textContent = 'Да';
-      $('door-link').style.color = 'var(--green)';
+  // ДОБАВЛЯЕМ СЕРВЕРА GOOGLE ДЛЯ СВЯЗИ (STUN)
+  peer = new Peer(myId, {
+    config: {
+      'iceServers': [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' },
+        { urls: 'stun:stun2.l.google.com:19302' }
+      ]
     }
+  });
+
+  peer.on('open', () => { 
+    updateStatus('✅ Онлайн. Ожидание второго устройства...', 'green');
     ensureConn(); 
   });
   
+  peer.on('disconnected', () => {
+    updateStatus('⚠️ Переподключение к серверу...', 'orange');
+    peer.reconnect();
+  });
+
   peer.on('error', e => { 
-    if(mode==='door') $('status-d').textContent = '⚠️ Ожидание сети...';
-    if(mode==='flat') $('status-f').textContent = '⚠️ Ожидание сети...';
-    if(mode==='admin') $('status-a').textContent = '⚠️ Ошибка сети';
+    console.log(e);
+    if(e.type === 'peer-unavailable') updateStatus('⚠️ Второе устройство не в сети', 'red');
+    else if(e.type === 'network') updateStatus('⚠️ Проблема с интернетом', 'red');
+    else updateStatus('⚠️ Ошибка: ' + e.type, 'red');
   });
   
-  peer.on('connection', c => { conn = c; bindConn(); });
+  peer.on('connection', c => { 
+    conn = c; 
+    bindConn(); 
+    updateStatus('✅ Связь установлена!', 'green');
+  });
   
   if (mode === 'flat') {
     peer.on('call', incoming => {
@@ -243,18 +172,34 @@ function notify(t, b) {
   }
 })();
 
+function updateStatus(text, color) {
+  const el = mode === 'door' ? $('status-d') : (mode === 'flat' ? $('status-f') : $('status-a'));
+  if (!el) return;
+  el.textContent = text;
+  el.style.color = color === 'green' ? 'var(--green)' : (color === 'red' ? 'var(--red)' : '#f39c12');
+  if(mode === 'admin') {
+    $('door-link').textContent = color === 'green' ? 'Да' : 'Нет';
+    $('door-link').style.color = color === 'green' ? 'var(--green)' : 'var(--red)';
+  }
+}
+
 function ensureConn() {
   if (conn && conn.open) return;
   conn = peer.connect(peerId, { reliable: true });
   bindConn();
-  setTimeout(() => { if (!conn?.open) ensureConn(); }, 4000);
+  setTimeout(() => { if (!conn?.open) ensureConn(); }, 5000);
 }
 
 function bindConn() {
   if (!conn) return;
+  conn.on('open', () => updateStatus('✅ Связь установлена!', 'green'));
+  conn.on('close', () => {
+    updateStatus('⚠️ Связь потеряна. Ждем...', 'orange');
+    setTimeout(ensureConn, 2000);
+  });
   conn.on('data', d => {
     if (mode === 'door') {
-      if (d.type === 'result') $('status-d').textContent = d.ok ? '🔓 ДВЕРЬ ОТКРЫТА!' : '❌ ДОСТУП ЗАПРЕЩЕН';
+      if (d.type === 'result') updateStatus(d.ok ? '🔓 ДВЕРЬ ОТКРЫТА!' : '❌ ДОСТУП ЗАПРЕЩЕН', d.ok ? 'green' : 'red');
     } else if (mode === 'flat') {
       if (d.type === 'signature') {
         $('sig_img').src = d.image; $('sig_box').style.display = 'block';
@@ -262,14 +207,13 @@ function bindConn() {
       } else if (d.type === 'verify_code') {
         const ok = currentCode && d.code === currentCode;
         conn.send({type:'result', ok});
-        $('status-f').textContent = ok ? '✅ Код верный' : '❌ Неверный код';
+        updateStatus(ok ? '✅ Код верный' : '❌ Неверный код', ok ? 'green' : 'red');
         if(ok){ currentCode=null; $('codedisplay').style.display='none'; }
       }
     }
   });
 }
 
-// --- ЛОГИКА ДВЕРИ ---
 if (mode === 'door') {
   const canvas = $('sig'), ctx = canvas.getContext('2d');
   let drawing = false, hasStroke = false;
@@ -281,7 +225,6 @@ if (mode === 'door') {
   }
   setTimeout(initCanvas, 100);
   $('clear').onclick = initCanvas;
-  
   canvas.addEventListener('pointerdown', e => { drawing=true; hasStroke=true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); });
   canvas.addEventListener('pointermove', e => { if(drawing) { ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); } });
   canvas.addEventListener('pointerup', () => drawing=false);
@@ -293,81 +236,75 @@ if (mode === 'door') {
     call.on('stream', r => { $('remote-d').srcObject = r; });
   }
 
-  $('call').onclick = () => { ensureConn(); startCall(); $('status-d').textContent = '📞 Вызов...'; };
+  $('call').onclick = () => { ensureConn(); startCall(); updateStatus('📞 Вызов...', 'green'); };
 
   $('sign_call').onclick = () => {
-    if (!hasStroke) return $('status-d').textContent = '⚠️ Сначала распишитесь';
+    if (!hasStroke) return updateStatus('⚠️ Сначала распишитесь', 'orange');
     const small = document.createElement('canvas'); small.width=400; small.height=150;
     const s = small.getContext('2d'); s.fillStyle='#fff'; s.fillRect(0,0,400,150);
     s.drawImage(canvas, 0, 0, canvas.width, canvas.height, 0, 0, 400, 150);
     const img = small.toDataURL('image/jpeg', 0.6);
-    
     ensureConn(); startCall();
     const send = () => {
-      if (conn?.open) { conn.send({ type:'signature', image: img }); $('status-d').textContent = '📨 Ждем ответа...'; }
-      else setTimeout(send, 400);
+      if (conn?.open) { conn.send({ type:'signature', image: img }); updateStatus('📨 Ждем ответа...', 'green'); }
+      else setTimeout(send, 500);
     };
     send(); initCanvas();
   };
 
   $('open_code').onclick = () => {
     const c = $('code').value.trim();
-    if (c.length !== 6) return $('status-d').textContent = '⚠️ Введите 6 цифр';
+    if (c.length !== 6) return updateStatus('⚠️ Введите 6 цифр', 'orange');
     ensureConn();
     const send = () => {
-      if (conn?.open) { conn.send({ type:'verify_code', code: c }); $('status-d').textContent = '⏳ Проверка...'; }
-      else setTimeout(send, 400);
+      if (conn?.open) { conn.send({ type:'verify_code', code: c }); updateStatus('⏳ Проверка...', 'green'); }
+      else setTimeout(send, 500);
     };
     send();
   };
-} 
-// --- ЛОГИКА КВАРТИРЫ ---
-else if (mode === 'flat') {
+} else if (mode === 'flat') {
   $('answer').onclick = () => {
     $('ring').style.display = 'none';
     if (!call) return;
     call.answer(localStream);
-    call.on('stream', r => { $('remote-f').srcObject = r; $('status-f').textContent = '🎥 Разговор'; });
+    call.on('stream', r => { $('remote-f').srcObject = r; updateStatus('🎥 Разговор', 'green'); });
   };
   $('decline').onclick = () => {
     $('ring').style.display = 'none';
     try { call?.close(); } catch(e){}
-    call = null; $('status-f').textContent = 'Отклонено';
+    call = null; updateStatus('Отклонено', 'orange');
   };
   $('accept_sig').onclick = () => {
     $('sig_box').style.display = 'none'; ensureConn();
-    const send = () => { if (conn?.open) { conn.send({type:'result', ok:true}); $('status-f').textContent = '✅ Дверь открыта'; } else setTimeout(send, 400); };
+    const send = () => { if (conn?.open) { conn.send({type:'result', ok:true}); updateStatus('✅ Дверь открыта', 'green'); } else setTimeout(send, 500); };
     send();
   };
   $('reject_sig').onclick = () => {
     $('sig_box').style.display = 'none'; ensureConn();
-    const send = () => { if (conn?.open) { conn.send({type:'result', ok:false}); $('status-f').textContent = '❌ Отклонено'; } else setTimeout(send, 400); };
+    const send = () => { if (conn?.open) { conn.send({type:'result', ok:false}); updateStatus('❌ Отклонено', 'red'); } else setTimeout(send, 500); };
     send();
   };
   $('open_direct').onclick = () => {
     ensureConn();
-    const send = () => { if (conn?.open) { conn.send({type:'result', ok:true}); $('status-f').textContent = '🔓 Дверь открыта'; } else setTimeout(send, 400); };
+    const send = () => { if (conn?.open) { conn.send({type:'result', ok:true}); updateStatus('🔓 Дверь открыта', 'green'); } else setTimeout(send, 500); };
     send();
   };
   $('gen_code').onclick = () => {
     currentCode = String(Math.floor(100000 + Math.random() * 900000));
     $('codedisplay').textContent = currentCode; $('codedisplay').style.display = 'block';
-    $('status-f').textContent = '🔑 Код создан'; notify('🔑 Код доступа', currentCode);
+    updateStatus('🔑 Код создан', 'green'); notify('🔑 Код доступа', currentCode);
   };
-}
-// --- ЛОГИКА АДМИНА ---
-else if (mode === 'admin') {
+} else if (mode === 'admin') {
   $('admin_open').onclick = () => {
     ensureConn();
-    $('status-a').textContent = 'Отправка команды...';
+    updateStatus('Отправка...', 'orange');
     const send = () => {
       if (conn?.open) {
-        // Админ отправляет команду открытия (используем тот же формат, что и квартира)
         conn.send({ type: 'result', ok: true }); 
-        $('status-a').textContent = '✅ Команда отправлена!';
-        setTimeout(() => $('status-a').textContent = '✅ Пульт онлайн', 3000);
+        updateStatus('✅ Команда отправлена!', 'green');
+        setTimeout(() => updateStatus('✅ Пульт онлайн', 'green'), 3000);
       } else {
-        $('status-a').textContent = '⚠️ Дверь не в сети';
+        updateStatus('⚠️ Дверь не в сети', 'red');
         setTimeout(send, 1000);
       }
     };
